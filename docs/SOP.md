@@ -1,4 +1,4 @@
-# Standard Operating Procedure (SOP): discovery-ai
+# Standard Operating Procedure (SOP): agentic-rag-engine
 
 Operational runbook for the discovery service. Audience: AI platform / ML ops.
 

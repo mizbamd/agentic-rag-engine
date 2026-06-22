@@ -1,4 +1,4 @@
-"""discovery-ai: a hybrid retrieval + RAG + agentic search reference implementation.
+"""agentic-rag-engine: a hybrid retrieval + RAG + agentic search reference implementation.
 
 The core (embeddings, BM25, fusion, reranking, retrieval, RAG) is intentionally pure-Python with
 no heavy ML dependencies so it is fully unit-testable and easy to reason about. Production swaps --

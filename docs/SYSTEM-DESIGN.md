@@ -1,4 +1,4 @@
-# System Design: discovery-ai
+# System Design: agentic-rag-engine
 
 ## 1. Problem
 Provide low-latency, high-precision search and grounded question answering over an enterprise corpus,

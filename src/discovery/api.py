@@ -12,7 +12,7 @@ from .documents import load_corpus
 from .rag import RagPipeline
 from .retriever import HybridRetriever
 
-app = FastAPI(title="discovery-ai", version="1.0.0")
+app = FastAPI(title="agentic-rag-engine", version="1.0.0")
 
 
 @lru_cache

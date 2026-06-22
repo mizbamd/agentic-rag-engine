@@ -1,9 +1,9 @@
-# Business Requirements Document (BRD): discovery-ai
+# Business Requirements Document (BRD): agentic-rag-engine
 
 | Field | Value |
 |---|---|
 | Document | Business Requirements Document |
-| Product | discovery-ai (hybrid search + RAG + agent) |
+| Product | agentic-rag-engine (hybrid search + RAG + agent) |
 | Version | 1.0 |
 | Status | Baselined |
 | Owner | AI Platform / Knowledge Engineering |

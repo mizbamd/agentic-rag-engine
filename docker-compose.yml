@@ -1,4 +1,4 @@
-name: discovery-ai
+name: agentic-rag-engine
 
 services:
   # pgvector is wired in for the production VectorStore adapter. The default in-memory store
@@ -17,7 +17,7 @@ services:
       timeout: 5s
       retries: 20
 
-  discovery-ai:
+  agentic-rag-engine:
     build:
       context: .
     environment:

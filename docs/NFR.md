@@ -1,4 +1,4 @@
-# Non-Functional Requirements (NFR): discovery-ai
+# Non-Functional Requirements (NFR): agentic-rag-engine
 
 ## 1. Quality / accuracy
 | ID | Requirement | Target |

@@ -1,4 +1,4 @@
-# Cost Savings Analysis: discovery-ai
+# Cost Savings Analysis: agentic-rag-engine
 
 Illustrative model of how the architecture reduces both operating (inference/infra) cost and the
 business cost of manual knowledge work. Figures are representative ranges, not a specific company's.
