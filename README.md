@@ -1,6 +1,6 @@
 # agentic-rag-engine
 
-[![CI](https://github.com/REPLACE_ME/agentic-rag-engine/actions/workflows/ci.yml/badge.svg)](./.github/workflows/ci.yml)
+[![CI](https://github.com/mizbamd/agentic-rag-engine/actions/workflows/ci.yml/badge.svg)](./.github/workflows/ci.yml)
 
 > Reference implementation of enterprise **hybrid search + RAG + agentic orchestration**. Dense
 > (vector) and sparse (BM25) retrieval fused with Reciprocal Rank Fusion, cross-encoder-style
