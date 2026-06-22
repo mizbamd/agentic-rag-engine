@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "discovery-ai"
+version = "1.0.0"
+description = "Hybrid retrieval + RAG + agentic search reference implementation"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "pydantic>=2.6",
+]
+
+[project.optional-dependencies]
+agent = ["langgraph>=0.2", "langchain-core>=0.3"]
+llm = ["openai>=1.30"]
+vector = ["psycopg[binary]>=3.1", "pgvector>=0.2"]
+dev = ["pytest>=8", "httpx>=0.27"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

@@ -1,0 +1,6 @@
+{"query": "how are funds moved between payer and payee and reversed on failure", "relevant": ["payments-settlement.md"]}
+{"query": "deductible coinsurance benefit determination audit trail", "relevant": ["claims-adjudication.md"]}
+{"query": "delivery versus payment position book of record trade bust", "relevant": ["trade-settlement.md"]}
+{"query": "margin rules promotions human approval canary price change", "relevant": ["retail-pricing.md"]}
+{"query": "hybrid retriever reciprocal rank fusion cross encoder grounded answer", "relevant": ["rag-architecture.md"]}
+{"query": "compensating reversal to keep balances correct", "relevant": ["payments-settlement.md", "claims-adjudication.md", "trade-settlement.md"]}
