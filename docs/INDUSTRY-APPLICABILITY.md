@@ -3,7 +3,7 @@
 Hybrid retrieval + grounded RAG is the same capability across every knowledge-intensive industry.
 The corpus changes; the architecture does not.
 
-| Capability | Product (MongoDB) | Healthcare (McKesson, UnitedHealth) | Financial / PE (Citi, BlackRock, Blackstone) | Retail / Restaurant (CVS, Uline, McDonald's) |
+| Capability | Product / SaaS | Healthcare / Claims | Financial Services / Private Equity | Retail / Restaurant |
 |---|---|---|---|---|
 | Hybrid search | Atlas Search-style product search | Clinical / formulary / policy search | Research, filings, deal-room search | Product / SKU / menu search |
 | Grounded RAG with citations | Docs Q&A, support copilots | Care-guideline and claims-policy Q&A | Investment memo / due-diligence Q&A | Merchandising and ops knowledge Q&A |

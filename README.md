@@ -7,7 +7,7 @@
 > reranking, grounded generation with citations, a guardrail that refuses ungrounded answers, a
 > LangGraph agent, and a retrieval evaluation harness (precision@k, MRR).
 
-Part of the [Enterprise Platform Reference Architecture](../README.md). Models the "Walmart Search"
+Part of the [Enterprise Platform Reference Architecture](../README.md). Models the enterprise search
 domain as a domain-agnostic discovery capability. See
 [`docs/INDUSTRY-APPLICABILITY.md`](docs/INDUSTRY-APPLICABILITY.md).
 
@@ -69,6 +69,7 @@ docker compose up --build   # app on :8000, pgvector on :5433
 ## Documentation
 - [System design + SLOs + capacity](docs/SYSTEM-DESIGN.md)
 - [Industry applicability](docs/INDUSTRY-APPLICABILITY.md)
+- Business & governance: [BRD](docs/BRD.md) - [SOP](docs/SOP.md) - [NFR](docs/NFR.md) - [Cost savings](docs/COST-SAVINGS.md)
 - ADRs: [`docs/adr/`](docs/adr/)
 
 ## Tech
