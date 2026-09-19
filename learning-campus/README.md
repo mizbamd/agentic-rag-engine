@@ -14,11 +14,11 @@ npm run dev -- --host 0.0.0.0 --port 5173
 
 Open **http://localhost:5173** in Chrome.
 
-Public HTTPS (no localhost): **https://handheld-drums-annual-entering.trycloudflare.com/**
+Public HTTPS (no localhost): **https://knows-explicitly-cologne-gregory.trycloudflare.com/**
 
 - Loading title is **Verity**, with an original Web Audio theme (mute on the loading screen or HUD).
-- Click your grade, then Math, Science, or Geography.
-- The on-screen board shows the question. Type the answer in the box and press Enter.
+- Click your grade, then a subject (Math, Science, Geography, Reading & English, or History).
+- The on-screen board shows a specific question, a **What this means** line, and a text box. Type the answer and press Enter.
 - WASD / arrow keys to walk. Click the canvas to look around, or click the ground to walk there.
 - Press **E** near Verity (courtyard) for practice, or at a lodge door for a short lesson.
 - Math practice is generated at the selected grade. Progress is stored in `localStorage`.
