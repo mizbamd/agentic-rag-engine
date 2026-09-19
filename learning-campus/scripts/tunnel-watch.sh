@@ -15,7 +15,7 @@ while true; do
       echo "$host" > "$URL_FILE"
       if grep -q 'Public HTTPS' README.md 2>/dev/null; then
         if ! grep -q "$host" README.md; then
-          sed -i "s|Public HTTPS (no localhost): \*\*https://[^*]*\*\*|Public HTTPS (no localhost): **${host}/**|" README.md || true
+          sed -i "s|Public HTTPS (no localhost, live tunnel): \*\*https://[^*]*\*\*|Public HTTPS (no localhost, live tunnel): **${host}/**|" README.md || true
         fi
       fi
     fi
