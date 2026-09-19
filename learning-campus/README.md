@@ -14,7 +14,7 @@ npm run dev -- --host 0.0.0.0 --port 5173
 
 Open **http://localhost:5173** in Chrome.
 
-Public HTTPS (no localhost): **https://answers-phil-inspection-lee.trycloudflare.com/**
+Public HTTPS (no localhost): **https://handheld-drums-annual-entering.trycloudflare.com/**
 
 - Loading title is **Verity**, with an original Web Audio theme (mute on the loading screen or HUD).
 - Click your grade, then Math, Science, or Geography.
