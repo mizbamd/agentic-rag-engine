@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Learning Campus — Verity’s Trails</title>
-    <script type="module" crossorigin src="./assets/index-6jAAHgKT.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-COZ7nVyo.css">
+    <script type="module" crossorigin src="./assets/index-C9kg1wRR.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DKc8FIuo.css">
   </head>
   <body>
     <div id="app">
@@ -75,8 +75,24 @@
       </div>
 
       <div id="help" class="help hidden">
-        Move with WASD or arrows. Look with the mouse (click the world to look
-        around). Click the ground to walk. Press E near a lodge or Verity.
+        Move with WASD or arrows. Answer on the board. Enter submits.
+        Click the world to look around. Press E near a lodge or Verity.
+      </div>
+
+      <div id="quiz-board" class="quiz hidden" aria-live="polite">
+        <p class="quiz-kicker" id="quiz-kicker">Practice</p>
+        <p id="quiz-prompt" class="quiz-prompt"></p>
+        <p id="quiz-meaning" class="quiz-meaning"></p>
+        <label class="quiz-box-label" id="quiz-format" for="quiz-input">Type your answer in the box</label>
+        <input
+          id="quiz-input"
+          class="quiz-box"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          placeholder="Answer"
+        />
+        <p id="quiz-fb" class="feedback"></p>
       </div>
 
       <div id="panel" class="panel hidden"></div>

@@ -1,2 +1,2 @@
 # Learning Campus
-Static build of Verity’s campus.
+Static build (Verity).
