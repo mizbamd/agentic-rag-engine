@@ -18,7 +18,7 @@ Public HTTPS (no localhost): **https://answers-phil-inspection-lee.trycloudflare
 
 - Loading title is **Verity**, with an original Web Audio theme (mute on the loading screen or HUD).
 - Click your grade, then Math, Science, or Geography.
-- The on-screen board shows the question. Answer with choices, the number pad, or the text box + **Submit** (Enter works too).
+- The on-screen board shows the question. Type the answer in the box and press Enter.
 - WASD / arrow keys to walk. Click the canvas to look around, or click the ground to walk there.
 - Press **E** near Verity (courtyard) for practice, or at a lodge door for a short lesson.
 - Math practice is generated at the selected grade. Progress is stored in `localStorage`.

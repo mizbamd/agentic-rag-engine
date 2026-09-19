@@ -81,25 +81,16 @@
       <div id="quiz-board" class="quiz hidden" aria-live="polite">
         <p class="quiz-kicker" id="quiz-kicker">Practice</p>
         <p id="quiz-prompt" class="quiz-prompt"></p>
-        <div id="quiz-choices" class="choices"></div>
-        <div class="answer-row">
-          <input
-            id="quiz-input"
-            type="text"
-            inputmode="decimal"
-            autocomplete="off"
-            placeholder="Type your answer"
-          />
-          <button type="button" class="action-btn primary" id="quiz-submit">
-            Submit
-          </button>
-        </div>
-        <div id="quiz-pad" class="num-pad"></div>
+        <label class="quiz-box-label" for="quiz-input">Type your answer in the box</label>
+        <input
+          id="quiz-input"
+          class="quiz-box"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          placeholder="Answer"
+        />
         <p id="quiz-fb" class="feedback"></p>
-        <div class="quiz-tools">
-          <button type="button" class="action-btn" id="quiz-hint">Hint</button>
-          <button type="button" class="action-btn" id="quiz-skip">New problem</button>
-        </div>
       </div>
 
       <div id="panel" class="panel hidden"></div>

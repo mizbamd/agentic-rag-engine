@@ -54,13 +54,8 @@ const ui = {
   quiz: document.getElementById("quiz-board"),
   quizKicker: document.getElementById("quiz-kicker"),
   quizPrompt: document.getElementById("quiz-prompt"),
-  quizChoices: document.getElementById("quiz-choices"),
   quizInput: document.getElementById("quiz-input"),
-  quizSubmit: document.getElementById("quiz-submit"),
-  quizPad: document.getElementById("quiz-pad"),
   quizFb: document.getElementById("quiz-fb"),
-  quizHint: document.getElementById("quiz-hint"),
-  quizSkip: document.getElementById("quiz-skip"),
 };
 
 let campus;
@@ -362,22 +357,8 @@ function shuffle(arr) {
   return a;
 }
 
-function choicesFor(p) {
-  if (p.choices?.length) return p.choices;
-  const ans = String(p.answer);
-  const n = Number(ans);
-  let extras = [ans];
-  if (!Number.isNaN(n)) extras = [n, n + 1, n - 1, n + 2, n - 2, n + 10].map(String);
-  const uniq = [...new Set(extras)].filter((x) => x !== "" && x !== "NaN");
-  if (!uniq.includes(ans)) uniq.unshift(ans);
-  return shuffle(uniq)
-    .slice(0, 4)
-    .map((label) => ({ id: label, label }));
-}
-
 function startOnScreenQuiz() {
   ui.quiz.classList.remove("hidden");
-  buildNumPad();
   showOnScreenProblem();
 }
 
@@ -390,83 +371,40 @@ function showOnScreenProblem() {
   ui.quizInput.value = "";
   ui.quizFb.textContent = "";
   ui.quizFb.className = "feedback";
-  ui.quizChoices.innerHTML = "";
-  choicesFor(problem).forEach((c) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "choice-btn";
-    b.textContent = c.label;
-    b.addEventListener("click", () => submitQuiz(c.id, b));
-    ui.quizChoices.appendChild(b);
-  });
   say(problem.speak);
   ui.quizInput.focus();
 }
 
-function buildNumPad() {
-  if (ui.quizPad.dataset.ready) return;
-  ui.quizPad.dataset.ready = "1";
-  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "−", "0", ".", "⌫"];
-  keys.forEach((k) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.textContent = k === "−" ? "−" : k;
-    if (k === "⌫") b.classList.add("wide");
-    b.addEventListener("click", () => {
-      if (k === "⌫") ui.quizInput.value = ui.quizInput.value.slice(0, -1);
-      else if (k === "−") ui.quizInput.value += "-";
-      else ui.quizInput.value += k === "." ? "." : k;
-      ui.quizInput.focus();
-    });
-    ui.quizPad.appendChild(b);
-  });
-}
-
-function submitQuiz(raw, choiceBtn) {
+function submitQuiz() {
   if (quizBusy || !problem) return;
-  const value = raw == null ? ui.quizInput.value : raw;
+  const value = ui.quizInput.value;
   if (String(value).trim() === "") {
     ui.quizFb.className = "feedback bad";
-    ui.quizFb.textContent = "Type an answer or tap a choice, then Submit.";
+    ui.quizFb.textContent = "Type your answer in the box, then press Enter.";
+    ui.quizInput.focus();
     return;
   }
   const ok = checkAnswer(problem, value);
   ui.quizFb.className = "feedback " + (ok ? "good" : "bad");
   ui.quizFb.textContent = ok ? pickLine(LINES.correct) : `${pickLine(LINES.incorrect)} ${problem.hint}`;
-  if (choiceBtn) choiceBtn.classList.add(ok ? "correct" : "wrong");
   recordAnswer(state, state.grade, state.subject, ok);
   refreshHud();
   if (ok) {
     quizBusy = true;
     say(ui.quizFb.textContent);
-    setTimeout(showOnScreenProblem, 850);
+    setTimeout(showOnScreenProblem, 700);
   } else {
     say(pickLine(LINES.incorrect) + " " + LINES.hintLead + problem.hint);
+    ui.quizInput.select();
   }
 }
 
-ui.quizSubmit.addEventListener("click", () => submitQuiz(ui.quizInput.value));
-ui.quizHint.addEventListener("click", () => {
-  if (!problem) return;
-  ui.quizFb.className = "feedback";
-  ui.quizFb.textContent = problem.hint;
-  say(LINES.hintLead + problem.hint);
-});
-ui.quizSkip.addEventListener("click", () => showOnScreenProblem());
 ui.quizInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
-    submitQuiz(ui.quizInput.value);
+    e.stopPropagation();
+    submitQuiz();
   }
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key !== "Enter") return;
-  if (ui.quiz.classList.contains("hidden")) return;
-  if (e.target === ui.quizInput) return;
-  const tag = e.target?.tagName;
-  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON") return;
-  e.preventDefault();
-  submitQuiz(ui.quizInput.value);
 });
 
 refreshHud();
