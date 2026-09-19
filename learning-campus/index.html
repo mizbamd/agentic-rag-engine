@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learning Campus — Verity’s Trails</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="scene"></canvas>
+
+      <div id="grade-screen" class="screen">
+        <div class="screen-card">
+          <p class="eyebrow">Learning Campus</p>
+          <h1>Hi, I’m Verity.</h1>
+          <p class="lede">
+            Click your grade. I’ll match every trail, lesson, and practice
+            question to you.
+          </p>
+          <div id="grade-grid" class="grade-grid"></div>
+        </div>
+      </div>
+
+      <div id="subject-screen" class="screen hidden">
+        <div class="screen-card">
+          <p class="eyebrow" id="subject-eyebrow">Choose a subject</p>
+          <h1>What shall we study?</h1>
+          <p class="lede">
+            Click a subject. The campus, lessons, and my practice questions
+            will follow that path.
+          </p>
+          <div id="subject-grid" class="subject-grid"></div>
+          <button type="button" class="text-btn" id="back-to-grade">
+            ← Change grade
+          </button>
+        </div>
+      </div>
+
+      <div id="hud" class="hud hidden">
+        <div class="hud-left">
+          <button type="button" class="pill" id="grade-chip" title="Change grade">
+            Grade
+          </button>
+          <button type="button" class="pill" id="subject-chip" title="Change subject">
+            Subject
+          </button>
+        </div>
+        <div class="hud-center">
+          <div id="prompt" class="prompt hidden"></div>
+        </div>
+        <div class="hud-right">
+          <span id="score-chip" class="pill quiet">0 / 0</span>
+          <button type="button" class="pill" id="mute-btn" aria-pressed="false">
+            Voice on
+          </button>
+        </div>
+      </div>
+
+      <div id="speech" class="speech hidden">
+        <div class="speech-name">Verity</div>
+        <p id="speech-text"></p>
+      </div>
+
+      <div id="help" class="help hidden">
+        Move with WASD or arrows. Look with the mouse (click the world to look
+        around). Click the ground to walk. Press E near a lodge or Verity.
+      </div>
+
+      <div id="panel" class="panel hidden"></div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
