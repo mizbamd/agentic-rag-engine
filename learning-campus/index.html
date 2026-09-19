@@ -74,8 +74,32 @@
       </div>
 
       <div id="help" class="help hidden">
-        Move with WASD or arrows. Look with the mouse (click the world to look
-        around). Click the ground to walk. Press E near a lodge or Verity.
+        Move with WASD or arrows. Answer on the board. Enter submits.
+        Click the world to look around. Press E near a lodge or Verity.
+      </div>
+
+      <div id="quiz-board" class="quiz hidden" aria-live="polite">
+        <p class="quiz-kicker" id="quiz-kicker">Practice</p>
+        <p id="quiz-prompt" class="quiz-prompt"></p>
+        <div id="quiz-choices" class="choices"></div>
+        <div class="answer-row">
+          <input
+            id="quiz-input"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            placeholder="Type your answer"
+          />
+          <button type="button" class="action-btn primary" id="quiz-submit">
+            Submit
+          </button>
+        </div>
+        <div id="quiz-pad" class="num-pad"></div>
+        <p id="quiz-fb" class="feedback"></p>
+        <div class="quiz-tools">
+          <button type="button" class="action-btn" id="quiz-hint">Hint</button>
+          <button type="button" class="action-btn" id="quiz-skip">New problem</button>
+        </div>
       </div>
 
       <div id="panel" class="panel hidden"></div>

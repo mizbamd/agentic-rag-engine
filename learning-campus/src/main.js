@@ -51,12 +51,23 @@ const ui = {
   boot: document.getElementById("boot-screen"),
   bootSub: document.getElementById("boot-sub"),
   bootMute: document.getElementById("boot-mute"),
+  quiz: document.getElementById("quiz-board"),
+  quizKicker: document.getElementById("quiz-kicker"),
+  quizPrompt: document.getElementById("quiz-prompt"),
+  quizChoices: document.getElementById("quiz-choices"),
+  quizInput: document.getElementById("quiz-input"),
+  quizSubmit: document.getElementById("quiz-submit"),
+  quizPad: document.getElementById("quiz-pad"),
+  quizFb: document.getElementById("quiz-fb"),
+  quizHint: document.getElementById("quiz-hint"),
+  quizSkip: document.getElementById("quiz-skip"),
 };
 
 let campus;
 let lastBiome;
 let panelMode = null;
 let problem = null;
+let quizBusy = false;
 
 initVoice({
   muted: state.muted,
@@ -127,6 +138,11 @@ async function tryTheme() {
 }
 
 function finishBoot() {
+  const params = new URLSearchParams(location.search);
+  if (GRADES.includes(params.get("grade"))) state.grade = params.get("grade");
+  if (MAIN_SUBJECTS.some((s) => s.id === params.get("subject"))) {
+    state.subject = params.get("subject");
+  }
   ui.boot.classList.add("fade");
   setTimeout(() => ui.boot.classList.add("hidden"), 500);
   if (state.grade && state.subject) selectSubject(state.subject);
@@ -139,6 +155,7 @@ function finishBoot() {
 function showGrade() {
   ui.gradeScreen.classList.remove("hidden");
   ui.subjectScreen.classList.add("hidden");
+  ui.quiz.classList.add("hidden");
   say(LINES.welcome);
 }
 
@@ -146,6 +163,7 @@ function showSubject() {
   if (!state.grade) return showGrade();
   ui.gradeScreen.classList.add("hidden");
   ui.subjectScreen.classList.remove("hidden");
+  ui.quiz.classList.add("hidden");
   ui.subjectEyebrow.textContent = `${gradeLabel(state.grade)} · choose a subject`;
 }
 
@@ -171,6 +189,7 @@ function selectSubject(id) {
     });
   }
   say(LINES.pickSubject(state.grade, id));
+  startOnScreenQuiz();
 }
 
 function refreshHud() {
@@ -333,6 +352,122 @@ function closePanel() {
   ui.panel.classList.add("hidden");
   ui.panel.innerHTML = "";
 }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function choicesFor(p) {
+  if (p.choices?.length) return p.choices;
+  const ans = String(p.answer);
+  const n = Number(ans);
+  let extras = [ans];
+  if (!Number.isNaN(n)) extras = [n, n + 1, n - 1, n + 2, n - 2, n + 10].map(String);
+  const uniq = [...new Set(extras)].filter((x) => x !== "" && x !== "NaN");
+  if (!uniq.includes(ans)) uniq.unshift(ans);
+  return shuffle(uniq)
+    .slice(0, 4)
+    .map((label) => ({ id: label, label }));
+}
+
+function startOnScreenQuiz() {
+  ui.quiz.classList.remove("hidden");
+  buildNumPad();
+  showOnScreenProblem();
+}
+
+function showOnScreenProblem() {
+  quizBusy = false;
+  problem = generateProblem(state.subject, state.grade);
+  const subj = SUBJECTS.find((s) => s.id === state.subject);
+  ui.quizKicker.textContent = `${gradeLabel(state.grade)} · ${subj.name}`;
+  ui.quizPrompt.textContent = problem.prompt;
+  ui.quizInput.value = "";
+  ui.quizFb.textContent = "";
+  ui.quizFb.className = "feedback";
+  ui.quizChoices.innerHTML = "";
+  choicesFor(problem).forEach((c) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "choice-btn";
+    b.textContent = c.label;
+    b.addEventListener("click", () => submitQuiz(c.id, b));
+    ui.quizChoices.appendChild(b);
+  });
+  say(problem.speak);
+  ui.quizInput.focus();
+}
+
+function buildNumPad() {
+  if (ui.quizPad.dataset.ready) return;
+  ui.quizPad.dataset.ready = "1";
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "−", "0", ".", "⌫"];
+  keys.forEach((k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = k === "−" ? "−" : k;
+    if (k === "⌫") b.classList.add("wide");
+    b.addEventListener("click", () => {
+      if (k === "⌫") ui.quizInput.value = ui.quizInput.value.slice(0, -1);
+      else if (k === "−") ui.quizInput.value += "-";
+      else ui.quizInput.value += k === "." ? "." : k;
+      ui.quizInput.focus();
+    });
+    ui.quizPad.appendChild(b);
+  });
+}
+
+function submitQuiz(raw, choiceBtn) {
+  if (quizBusy || !problem) return;
+  const value = raw == null ? ui.quizInput.value : raw;
+  if (String(value).trim() === "") {
+    ui.quizFb.className = "feedback bad";
+    ui.quizFb.textContent = "Type an answer or tap a choice, then Submit.";
+    return;
+  }
+  const ok = checkAnswer(problem, value);
+  ui.quizFb.className = "feedback " + (ok ? "good" : "bad");
+  ui.quizFb.textContent = ok ? pickLine(LINES.correct) : `${pickLine(LINES.incorrect)} ${problem.hint}`;
+  if (choiceBtn) choiceBtn.classList.add(ok ? "correct" : "wrong");
+  recordAnswer(state, state.grade, state.subject, ok);
+  refreshHud();
+  if (ok) {
+    quizBusy = true;
+    say(ui.quizFb.textContent);
+    setTimeout(showOnScreenProblem, 850);
+  } else {
+    say(pickLine(LINES.incorrect) + " " + LINES.hintLead + problem.hint);
+  }
+}
+
+ui.quizSubmit.addEventListener("click", () => submitQuiz(ui.quizInput.value));
+ui.quizHint.addEventListener("click", () => {
+  if (!problem) return;
+  ui.quizFb.className = "feedback";
+  ui.quizFb.textContent = problem.hint;
+  say(LINES.hintLead + problem.hint);
+});
+ui.quizSkip.addEventListener("click", () => showOnScreenProblem());
+ui.quizInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    submitQuiz(ui.quizInput.value);
+  }
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  if (ui.quiz.classList.contains("hidden")) return;
+  if (e.target === ui.quizInput) return;
+  const tag = e.target?.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON") return;
+  e.preventDefault();
+  submitQuiz(ui.quizInput.value);
+});
 
 refreshHud();
 document.addEventListener(

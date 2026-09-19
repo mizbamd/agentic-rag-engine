@@ -198,6 +198,10 @@ export function createCampus(canvas, { onZone, onInteract }) {
   const clock = new THREE.Clock();
 
   addEventListener("keydown", (e) => {
+    const el = e.target;
+    if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) {
+      return;
+    }
     keys[e.code] = true;
     if (e.code === "KeyE") {
       const z = currentZone();
