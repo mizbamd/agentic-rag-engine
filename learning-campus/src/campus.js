@@ -176,8 +176,10 @@ export function createCampus(canvas, { onZone, onInteract }) {
   block(0, 1, -16, "#b9a48a");
   block(0, 2, -16, "#b9a48a");
 
-  const verity = makeVerity();
-  verity.position.set(2, 0, 3);
+  const VERITY_R = 0.42;
+  const GROUND_TOP = 1;
+  const verity = makeVerity(VERITY_R);
+  verity.position.set(2, GROUND_TOP + VERITY_R, 3);
   scene.add(verity);
 
   const zones = [
@@ -312,11 +314,12 @@ export function createCampus(canvas, { onZone, onInteract }) {
     pos.y = 1.6;
     camera.position.copy(pos);
 
-    const target = new THREE.Vector3(pos.x + 1.2, 0, pos.z + 0.4);
+    const target = new THREE.Vector3(pos.x + 1.4, GROUND_TOP + VERITY_R, pos.z + 0.5);
     verity.position.x += (target.x - verity.position.x) * 0.02;
     verity.position.z += (target.z - verity.position.z) * 0.02;
-    verity.position.y = Math.sin(performance.now() / 280) * (speaking ? 0.08 : 0.03);
-    verity.lookAt(pos.x, 0.4, pos.z);
+    verity.position.y =
+      GROUND_TOP + VERITY_R + Math.sin(performance.now() / 280) * (speaking ? 0.06 : 0.03);
+    verity.lookAt(pos.x, GROUND_TOP + 0.9, pos.z);
 
     const z = currentZone();
     if (z?.id !== activeZone?.id) {
@@ -336,26 +339,29 @@ export function createCampus(canvas, { onZone, onInteract }) {
   };
 }
 
-function makeVerity() {
+function makeVerity(radius = 0.42) {
   const g = new THREE.Group();
-  const box = (w, h, d, color, x, y, z) => {
-    const m = new THREE.Mesh(
-      new THREE.BoxGeometry(w, h, d),
-      new THREE.MeshLambertMaterial({ color })
-    );
-    m.position.set(x, y, z);
-    g.add(m);
-  };
-  box(0.22, 0.22, 0.22, "#6b5344", -0.12, 0.12, 0);
-  box(0.22, 0.22, 0.22, "#6b5344", 0.12, 0.12, 0);
-  box(0.38, 0.55, 0.28, "#7aa392", 0, 0.52, 0);
-  box(0.16, 0.42, 0.16, "#e7c4b0", -0.28, 0.5, 0);
-  box(0.16, 0.42, 0.16, "#e7c4b0", 0.28, 0.5, 0);
-  box(0.42, 0.42, 0.42, "#f0d0c0", 0, 1.05, 0);
-  box(0.46, 0.16, 0.46, "#6b5344", 0, 1.28, 0);
-  box(0.08, 0.08, 0.06, "#3d3a36", -0.1, 1.08, 0.2);
-  box(0.08, 0.08, 0.06, "#3d3a36", 0.1, 1.08, 0.2);
-  box(0.18, 0.05, 0.05, "#c9897a", 0, 0.94, 0.2);
+  const ball = new THREE.Mesh(
+    new THREE.SphereGeometry(radius, 24, 18),
+    new THREE.MeshLambertMaterial({ color: "#f2d35b" })
+  );
+  g.add(ball);
+  const eyeMat = new THREE.MeshLambertMaterial({ color: "#3d3a36" });
+  const eyeGeo = new THREE.SphereGeometry(0.055, 10, 8);
+  const eyeY = 0.1;
+  const eyeZ = radius * 0.82;
+  const left = new THREE.Mesh(eyeGeo, eyeMat);
+  left.position.set(-0.12, eyeY, eyeZ);
+  const right = new THREE.Mesh(eyeGeo, eyeMat);
+  right.position.set(0.12, eyeY, eyeZ);
+  g.add(left, right);
+  const smile = new THREE.Mesh(
+    new THREE.TorusGeometry(0.14, 0.028, 8, 16, Math.PI),
+    eyeMat
+  );
+  smile.position.set(0, -0.08, radius * 0.78);
+  smile.rotation.set(Math.PI / 2, 0, Math.PI);
+  g.add(smile);
   return g;
 }
 

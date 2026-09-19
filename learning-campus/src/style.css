@@ -348,6 +348,13 @@ h1 {
   color: var(--ink);
 }
 
+.quiz-meaning {
+  margin: 0 0 14px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
 .quiz-box-label {
   display: block;
   margin: 0 0 8px;

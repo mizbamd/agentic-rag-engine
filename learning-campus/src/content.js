@@ -76,7 +76,7 @@ function shuffle(arr) {
   return a;
 }
 
-function choiceProblem({ prompt, speak, answer, hint, extras = [] }) {
+function choiceProblem({ prompt, speak, answer, hint, extras = [], meaning, format }) {
   const ans = String(answer);
   const opts = shuffle(
     [...new Set([ans, ...extras.map(String), String(answer)])]
@@ -89,6 +89,21 @@ function choiceProblem({ prompt, speak, answer, hint, extras = [] }) {
     choices: shuffle(opts).map((label) => ({ id: label, label })),
     answer: ans,
     hint,
+    meaning: meaning || hint,
+    format: format || "Type the answer in the box.",
+  };
+}
+
+function typedProblem({ prompt, speak, answer, hint, meaning, format, accept }) {
+  return {
+    prompt,
+    speak,
+    type: "input",
+    answer: String(answer),
+    hint,
+    meaning,
+    format,
+    accept,
   };
 }
 
@@ -291,20 +306,29 @@ export function getLesson(subject, grade) {
 }
 
 export function generateProblem(subject, grade) {
+  let p;
   switch (subject) {
     case "math":
-      return generateMath(grade);
+      p = generateMath(grade);
+      break;
     case "science":
-      return generateScience(grade);
+      p = generateScience(grade);
+      break;
     case "geography":
-      return generateGeography(grade);
+      p = generateGeography(grade);
+      break;
     case "english":
-      return generateEnglish(grade);
+      p = generateEnglish(grade);
+      break;
     case "history":
-      return generateHistory(grade);
+      p = generateHistory(grade);
+      break;
     default:
-      return generateMath(grade);
+      p = generateMath(grade);
   }
+  if (!p.meaning) p.meaning = p.hint;
+  if (!p.format) p.format = "Type the answer in the box, then press Enter.";
+  return p;
 }
 
 function generateMath(grade) {
@@ -313,23 +337,25 @@ function generateMath(grade) {
     const n = rand(2, 8);
     const icon = pick(["★", "●", "■", "▲"]);
     const name = { "★": "stars", "●": "pebbles", "■": "tiles", "▲": "trees" }[icon];
-    return choiceProblem({
-      prompt: `Count the ${name}:\n${icon.repeat(n)}`,
-      speak: `Count slowly. How many ${name} do you see?`,
+    return typedProblem({
+      prompt: `How many ${name} are there?\n${icon.repeat(n)}`,
+      speak: `Count the ${name}. Type how many as a whole number.`,
       answer: n,
-      hint: "Touch each one in your mind: one, two, three…",
-      extras: [n - 1, n + 1, n + 2, Math.max(1, n - 2)],
+      hint: "Count each mark once.",
+      meaning: `This asks you to count the ${name} and type that count, with no extra words.`,
+      format: "Type a whole number (example: 4).",
     });
   }
   if (g === 1) {
     const a = rand(1, 9);
     const b = rand(1, 10 - a);
-    return choiceProblem({
-      prompt: `${a} + ${b} = ?`,
-      speak: `What is ${a} plus ${b}?`,
+    return typedProblem({
+      prompt: `Add: ${a} + ${b} = ?`,
+      speak: `Add ${a} plus ${b}. Type the total as a whole number.`,
       answer: a + b,
       hint: `Start at ${a}, then count up ${b} more.`,
-      extras: [a + b + 1, Math.abs(a - b), a + b + 2, b],
+      meaning: `You are putting ${a} and ${b} together. Type only the total.`,
+      format: "Type a whole number (example: 12).",
     });
   }
   if (g === 2) {
@@ -337,143 +363,151 @@ function generateMath(grade) {
     const b = rand(5, 20);
     const add = Math.random() < 0.5;
     const ans = add ? a + b : a - b;
-    return {
-      prompt: `${a} ${add ? "+" : "−"} ${b} = ?`,
-      speak: `What is ${a} ${add ? "plus" : "minus"} ${b}?`,
-      type: "input",
-      answer: String(ans),
-      hint: add ? "Add the ones, then the tens." : "Subtract the ones, then the tens.",
-    };
+    return typedProblem({
+      prompt: add ? `Add: ${a} + ${b} = ?` : `Subtract: ${a} − ${b} = ?`,
+      speak: add ? `What is ${a} plus ${b}?` : `What is ${a} minus ${b}?`,
+      answer: ans,
+      hint: add ? "Add ones, then tens." : "Subtract ones, then tens.",
+      meaning: add
+        ? `Join ${a} and ${b}. Type only the total.`
+        : `Start at ${a} and take away ${b}. Type what is left.`,
+      format: "Type a whole number (example: 46).",
+    });
   }
   if (g === 3) {
     const a = rand(2, 9);
     const b = rand(2, 9);
-    return choiceProblem({
-      prompt: `${a} × ${b} = ?`,
-      speak: `What is ${a} times ${b}?`,
+    return typedProblem({
+      prompt: `Multiply: ${a} × ${b} = ?`,
+      speak: `What is ${a} times ${b}? Type a whole number.`,
       answer: a * b,
-      hint: `${a} groups of ${b} is the same as adding ${b}, ${a} times.`,
-      extras: [a * b + a, a * (b - 1), a + b, a * b + 1],
+      hint: `${a} groups of ${b}.`,
+      meaning: `Multiplication is ${a} equal groups of ${b}. Type the total.`,
+      format: "Type a whole number (example: 24).",
     });
   }
   if (g === 4) {
     const a = rand(12, 28);
     const b = rand(3, 8);
-    return {
-      prompt: `${a} × ${b} = ?`,
-      speak: `Multiply ${a} by ${b}.`,
-      type: "input",
-      answer: String(a * b),
-      hint: `Think of ${a} × ${b} as ${a} tens and ones, each multiplied by ${b}.`,
-    };
+    return typedProblem({
+      prompt: `Multiply: ${a} × ${b} = ?`,
+      speak: `Multiply ${a} by ${b}. Type a whole number.`,
+      answer: a * b,
+      hint: `Break ${a} into tens and ones, multiply each by ${b}.`,
+      meaning: `The product is how many you get if you take ${a}, ${b} times. Type digits only.`,
+      format: "Type a whole number (example: 84).",
+    });
   }
   if (g === 5) {
-    const whole = rand(2, 8);
-    const tenths = rand(1, 9);
-    const n = whole + tenths / 10;
+    const n = rand(2, 8) + rand(1, 9) / 10;
     const add = rand(1, 4) / 10;
     const ans = Math.round((n + add) * 10) / 10;
-    return {
-      prompt: `${n.toFixed(1)} + ${add.toFixed(1)} = ?`,
-      speak: `Add the decimals ${n.toFixed(1)} and ${add.toFixed(1)}.`,
-      type: "input",
-      answer: String(ans),
+    return typedProblem({
+      prompt: `Add the decimals: ${n.toFixed(1)} + ${add.toFixed(1)} = ?`,
+      speak: `Add ${n.toFixed(1)} and ${add.toFixed(1)}. Type one decimal place.`,
+      answer: ans.toFixed(1),
       hint: "Line up the decimal points, then add.",
-    };
+      meaning: `These are tenths. Type a number like ${ans.toFixed(1)}, not a fraction.`,
+      format: "Type a decimal with one place (example: 3.4).",
+    });
   }
   if (g === 6) {
     const a = rand(2, 8);
     const b = rand(a + 1, 12);
-    return choiceProblem({
-      prompt: `A recipe uses ${a} cups of oats for ${b} cups of mix. What is the ratio of oats to mix?`,
-      speak: `What is the ratio of oats to the whole mix?`,
+    return typedProblem({
+      prompt: `A mix uses ${a} cups of oats in ${b} cups of mix. Type oats:mix.`,
+      speak: `Type the ratio of oats to mix as ${a} colon ${b}.`,
       answer: `${a}:${b}`,
-      hint: "Ratio of part to whole keeps both numbers in the same order.",
-      extras: [`${b}:${a}`, `${a}:${a + b}`, `${a - 1}:${b}`, `${a}:${b - 1}`],
+      hint: "Oats first, then the whole mix, with a colon.",
+      meaning: `A ratio compares two amounts in order. Type ${a}:${b} with a colon.`,
+      format: "Type a ratio like 3:7",
     });
   }
   if (g === 7) {
     const x = rand(3, 12);
     const m = rand(2, 6);
     const b = rand(1, 9);
-    return {
-      prompt: `Solve for x: ${m}x + ${b} = ${m * x + b}`,
-      speak: `Solve ${m} x plus ${b} equals ${m * x + b}. What is x?`,
-      type: "input",
-      answer: String(x),
-      hint: `Subtract ${b} from both sides, then divide by ${m}.`,
-    };
+    return typedProblem({
+      prompt: `Solve for x.\n${m}x + ${b} = ${m * x + b}`,
+      speak: `Solve ${m} x plus ${b}. Type x as a whole number.`,
+      answer: x,
+      hint: `Subtract ${b}, then divide by ${m}.`,
+      meaning: `Undo adding ${b}, then undo multiplying by ${m}. Type only x.`,
+      format: "Type a whole number for x (example: 5).",
+    });
   }
   if (g === 8) {
-    const x1 = 0;
     const y1 = rand(1, 5);
     const x2 = rand(2, 6);
     const slope = pick([2, 3, -1, -2, 1]);
-    const y2 = y1 + slope * (x2 - x1);
-    return {
-      prompt: `A line passes through (${x1}, ${y1}) and (${x2}, ${y2}). What is the slope?`,
-      speak: `Find the slope between those two points.`,
-      type: "input",
-      answer: String(slope),
-      hint: "Slope is rise over run: change in y divided by change in x.",
-    };
+    const y2 = y1 + slope * x2;
+    return typedProblem({
+      prompt: `A line goes through (0, ${y1}) and (${x2}, ${y2}). What is the slope?`,
+      speak: `Type the slope as an integer.`,
+      answer: slope,
+      hint: `Slope = (${y2} − ${y1}) ÷ ${x2}.`,
+      meaning: `Slope is rise over run. Type a single integer, with a minus if it goes down.`,
+      format: "Type an integer (example: -2 or 3).",
+    });
   }
   if (g === 9) {
     const x = rand(-6, 8) || 3;
     const a = rand(2, 5);
     const c = rand(-8, 8);
-    return {
-      prompt: `Solve: ${a}(x − ${x}) = ${c}. Wait — find x if ${a}x + ${c} = ${a * x + c}.`,
-      speak: `Solve ${a} x plus ${c} equals ${a * x + c}.`,
-      type: "input",
-      answer: String(x),
-      hint: `Undo addition first, then divide by ${a}.`,
-    };
+    return typedProblem({
+      prompt: `Solve for x.\n${a}x + ${c} = ${a * x + c}`,
+      speak: `Type x as an integer.`,
+      answer: x,
+      hint: `Subtract ${c}, then divide by ${a}.`,
+      meaning: `Undo adding ${c}, then undo multiplying by ${a}. Type only the number for x.`,
+      format: "Type an integer for x (example: -3 or 8).",
+    });
   }
   if (g === 10) {
-    const a = pick([3, 5, 6, 8]);
-    const b = pick([4, 12, 8, 15]);
+    const triples = [[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17]];
     if (Math.random() < 0.5) {
-      return {
-        prompt: `A right triangle has legs ${a} and ${b}. What is the hypotenuse length? (whole number)`,
-        speak: `Use the Pythagorean relation to find the hypotenuse.`,
-        type: "input",
-        answer: String(Math.hypot(a, b) % 1 === 0 ? Math.hypot(a, b) : Math.round(Math.hypot(a, b))),
-        hint: "Hypotenuse squared equals the two legs squared and added.",
-        accept: (val) =>
-          Math.abs(Number(val) - Math.hypot(a, b)) < 0.15 ||
-          String(val) === String(Math.round(Math.hypot(a, b))),
-      };
+      const [a, b, c] = pick(triples);
+      return typedProblem({
+        prompt: `A right triangle has legs ${a} and ${b}. What is the hypotenuse?`,
+        speak: `Type the hypotenuse as a whole number.`,
+        answer: c,
+        hint: `Hypotenuse² = ${a}² + ${b}².`,
+        meaning: `Use a² + b² = c². Type c as a whole number.`,
+        format: "Type a whole number (example: 13).",
+      });
     }
     const w = rand(4, 12);
     const h = rand(3, 9);
-    return {
+    return typedProblem({
       prompt: `A rectangle is ${w} by ${h}. What is its area?`,
-      speak: `What is the area of a ${w} by ${h} rectangle?`,
-      type: "input",
-      answer: String(w * h),
-      hint: "Area of a rectangle is length times width.",
-    };
+      speak: `Type the area as a whole number.`,
+      answer: w * h,
+      hint: "Length times width.",
+      meaning: `Multiply ${w} by ${h}. Type that product only.`,
+      format: "Type a whole number (example: 48).",
+    });
   }
   if (g === 11) {
     const r1 = rand(1, 5);
     const r2 = r1 + rand(1, 4);
-    return choiceProblem({
-      prompt: `One root of x² − ${r1 + r2}x + ${r1 * r2} = 0 is ${r1}. What is the other root?`,
-      speak: `The constant term is the product of the roots. What is the other root?`,
+    return typedProblem({
+      prompt: `x² − ${r1 + r2}x + ${r1 * r2} = 0 has one root ${r1}. Type the other root.`,
+      speak: `Type the other root as a whole number.`,
       answer: r2,
-      hint: "For x² − (sum)x + product = 0, the roots add to the middle coefficient.",
-      extras: [r1 + r2, r1 * r2, r2 + 1, r1 - 1],
+      hint: `The roots multiply to ${r1 * r2}.`,
+      meaning: `The other root multiplies with ${r1} to make ${r1 * r2}. Type that number only.`,
+      format: "Type a whole number (example: 4).",
     });
   }
   const deg = pick([0, 30, 45, 60, 90]);
   const table = { 0: "0", 30: "1/2", 45: "√2/2", 60: "√3/2", 90: "1" };
-  return choiceProblem({
+  return typedProblem({
     prompt: `What is sin(${deg}°)?`,
-    speak: `On the unit circle, what is sine of ${deg} degrees?`,
+    speak: `Type sine of ${deg} degrees.`,
     answer: table[deg],
     hint: "Sine is the y-coordinate on the unit circle.",
-    extras: ["0", "1", "1/2", "√2/2", "√3/2"].filter((x) => x !== table[deg]),
+    meaning: `Type ${table[deg]} exactly, not a long decimal.`,
+    format: "Type 0, 1, 1/2, √2/2, or √3/2.",
   });
 }
 
@@ -481,72 +515,80 @@ function generateScience(grade) {
   const g = gradeNum(grade);
   if (g <= 2) {
     return pick([
-      choiceProblem({
-        prompt: "Which of these is a living thing?",
-        speak: "Which one is living?",
-        answer: "A seedling",
-        extras: ["A pebble", "A glass marble", "A metal key"],
-        hint: "Living things grow and need energy.",
+      typedProblem({
+        prompt: "Is a seedling living or not living?",
+        speak: "Type living or not living.",
+        answer: "living",
+        hint: "Living things grow.",
+        meaning: "A seedling grows, so it is living. Type the word living.",
+        format: "Type: living",
       }),
-      choiceProblem({
-        prompt: "Which sense helps you notice a bell ringing?",
-        speak: "Which sense notices a bell?",
-        answer: "Hearing",
-        extras: ["Taste", "Sight", "Touch"],
+      typedProblem({
+        prompt: "Which sense notices a bell ringing: sight or hearing?",
+        speak: "Type sight or hearing.",
+        answer: "hearing",
         hint: "A bell makes sound.",
+        meaning: "A ringing bell is sound, so you use hearing. Type that one word.",
+        format: "Type: hearing",
       }),
     ]);
   }
   if (g <= 5) {
     return pick([
-      choiceProblem({
-        prompt: "In the water cycle, water vapor turning into droplets is called…",
-        speak: "What do we call vapor turning into droplets?",
-        answer: "Condensation",
-        extras: ["Evaporation", "Erosion", "Orbit"],
-        hint: "Think of a cold glass getting misty on the outside.",
+      typedProblem({
+        prompt: "Water vapor turning into droplets is called what?",
+        speak: "Type the process name.",
+        answer: "condensation",
+        hint: "A cold glass gets misty.",
+        meaning: "Vapor cools and becomes liquid drops. Type condensation.",
+        format: "Type: condensation",
       }),
-      choiceProblem({
-        prompt: "A habitat must provide food, water, shelter, and…",
-        speak: "What else does a habitat need besides food, water, and shelter?",
-        answer: "Space",
-        extras: ["Homework", "Plastic", "Magnets"],
-        hint: "Living things need room to move and grow.",
+      typedProblem({
+        prompt: "A habitat needs food, water, shelter, and what else?",
+        speak: "Type the missing need.",
+        answer: "space",
+        hint: "Living things need room.",
+        meaning: "Animals also need space to move. Type the word space.",
+        format: "Type: space",
       }),
     ]);
   }
   if (g <= 8) {
     return pick([
-      choiceProblem({
-        prompt: "Which organelle is found in plant cells and captures sunlight?",
-        speak: "Which plant-cell part captures sunlight?",
-        answer: "Chloroplast",
-        extras: ["Mitochondrion only", "Nucleus only", "Cell membrane only"],
-        hint: "It is related to the green color of many leaves.",
+      typedProblem({
+        prompt: "Which plant-cell part captures sunlight?",
+        speak: "Type the organelle name.",
+        answer: "chloroplast",
+        hint: "It relates to green leaves.",
+        meaning: "Chloroplasts catch sunlight for food-making. Type chloroplast.",
+        format: "Type: chloroplast",
       }),
-      choiceProblem({
-        prompt: "Heat is best described as…",
-        speak: "What is heat, in particle language?",
-        answer: "The motion of particles",
-        extras: ["A kind of atom", "A color of light", "A type of gravity"],
-        hint: "Warmer things have particles jiggling more.",
+      typedProblem({
+        prompt: "Heat is the motion of what?",
+        speak: "Type particles.",
+        answer: "particles",
+        hint: "Warmer things jiggle more.",
+        meaning: "Heat means particles moving faster. Type particles.",
+        format: "Type: particles",
       }),
     ]);
   }
   return pick([
-    choiceProblem({
-      prompt: "Photosynthesis primarily stores sunlight in…",
-      speak: "What does photosynthesis store sunlight in?",
-      answer: "Sugars",
-      extras: ["Iron nails", "Sound waves", "Fossils only"],
-      hint: "Plants build energy-rich molecules from carbon dioxide and water.",
+    typedProblem({
+      prompt: "Photosynthesis stores sunlight mainly in what molecules?",
+      speak: "Type sugars.",
+      answer: "sugars",
+      hint: "Plants build energy-rich molecules.",
+      meaning: "Sunlight is stored in sugars. Type sugars.",
+      format: "Type: sugars",
     }),
-    choiceProblem({
-      prompt: "A net force on an object causes…",
-      speak: "What does a net force cause?",
-      answer: "Acceleration",
-      extras: ["A change of color only", "A new element", "Zero mass"],
-      hint: "Newton’s second idea links force, mass, and changing velocity.",
+    typedProblem({
+      prompt: "A net force on an object causes what change in motion?",
+      speak: "Type acceleration.",
+      answer: "acceleration",
+      hint: "Force changes velocity.",
+      meaning: "A net force speeds up, slows, or turns an object. Type acceleration.",
+      format: "Type: acceleration",
     }),
   ]);
 }
@@ -555,72 +597,80 @@ function generateGeography(grade) {
   const g = gradeNum(grade);
   if (g <= 2) {
     return pick([
-      choiceProblem({
-        prompt: "On many maps, blue usually stands for…",
-        speak: "What does blue often mean on a map?",
-        answer: "Water",
-        extras: ["Fire", "Night", "Sand only"],
-        hint: "Think of lakes, rivers, and oceans.",
+      typedProblem({
+        prompt: "On many maps, blue usually stands for what?",
+        speak: "Type water.",
+        answer: "water",
+        hint: "Think lakes and oceans.",
+        meaning: "Mapmakers often color water blue. Type water.",
+        format: "Type: water",
       }),
-      choiceProblem({
-        prompt: "A continent is…",
-        speak: "What is a continent?",
-        answer: "A very large land",
-        extras: ["A small hill", "A kind of cloud", "A classroom rule"],
-        hint: "Africa and Asia are examples.",
+      typedProblem({
+        prompt: "A continent is a very large what: land or cloud?",
+        speak: "Type land or cloud.",
+        answer: "land",
+        hint: "Africa is an example.",
+        meaning: "A continent is a huge piece of land. Type land.",
+        format: "Type: land",
       }),
     ]);
   }
   if (g <= 5) {
     return pick([
-      choiceProblem({
-        prompt: "How many continents are there on Earth, as commonly taught?",
-        speak: "How many continents are commonly taught?",
+      typedProblem({
+        prompt: "How many continents are commonly taught on Earth?",
+        speak: "Type a whole number.",
         answer: "7",
-        extras: ["3", "12", "21"],
-        hint: "Count from Africa through Australia and Antarctica.",
+        hint: "Count Africa through Antarctica.",
+        meaning: "Most classrooms teach seven continents. Type 7.",
+        format: "Type a whole number (example: 7).",
       }),
-      choiceProblem({
-        prompt: "Climate is…",
-        speak: "What is climate?",
-        answer: "The usual weather over many years",
-        extras: ["Today’s puddle", "A single lightning flash", "A city mayor"],
+      typedProblem({
+        prompt: "Climate is weather over many years or just today?",
+        speak: "Type years or today.",
+        answer: "years",
         hint: "Weather is now; climate is the long pattern.",
+        meaning: "Climate is the usual weather over years. Type years.",
+        format: "Type: years",
       }),
     ]);
   }
   if (g <= 8) {
     return pick([
-      choiceProblem({
-        prompt: "Latitude lines measure distance from the…",
-        speak: "Latitude is measured from which line?",
-        answer: "Equator",
-        extras: ["Prime street", "Moon", "North Star only"],
-        hint: "The equator sits halfway between the poles.",
+      typedProblem({
+        prompt: "Latitude is measured from which line: equator or moon?",
+        speak: "Type equator or moon.",
+        answer: "equator",
+        hint: "Halfway between the poles.",
+        meaning: "Latitude starts at the equator. Type equator.",
+        format: "Type: equator",
       }),
-      choiceProblem({
-        prompt: "Cities often grow along rivers because rivers provide…",
-        speak: "Why do cities often grow along rivers?",
-        answer: "Water and travel routes",
-        extras: ["Extra gravity", "Thinner air only", "Shorter years"],
-        hint: "People need drinking water and a way to move goods.",
+      typedProblem({
+        prompt: "Cities often grow along rivers for water and what: travel or gravity?",
+        speak: "Type travel or gravity.",
+        answer: "travel",
+        hint: "Boats move goods.",
+        meaning: "Rivers give drinking water and travel routes. Type travel.",
+        format: "Type: travel",
       }),
     ]);
   }
   return pick([
-    choiceProblem({
-      prompt: "Physical geography focuses most on…",
-      speak: "What does physical geography study?",
-      answer: "Landforms, climate, and biomes",
-      extras: ["Only election results", "Only novel plots", "Only multiplication"],
-      hint: "Think mountains, rainfall, and living regions.",
+    typedProblem({
+      prompt: "Physical geography studies landforms, climate, and biomes. Type biomes or elections.",
+      speak: "Type biomes or elections.",
+      answer: "biomes",
+      hint: "Think living regions of Earth.",
+      meaning: "Physical geography is about the natural Earth, including biomes. Type biomes.",
+      format: "Type: biomes",
     }),
-    choiceProblem({
-      prompt: "Earthquakes are most closely linked to…",
-      speak: "What are earthquakes most closely linked to?",
-      answer: "Moving plates of Earth’s crust",
-      extras: ["The color of soil only", "Classroom bells", "Ocean names"],
-      hint: "Earth’s outer shell is broken into large moving pieces.",
+    typedProblem({
+      prompt: "Earthquakes are linked to moving plates of Earth’s crust. Type plates or soil-color.",
+      speak: "Type plates.",
+      answer: "plates",
+      hint: "Earth’s outer shell is in large pieces.",
+      meaning: "Moving crustal plates cause quakes. Type plates.",
+      format: "Type: plates",
     }),
   ]);
 }
@@ -629,72 +679,80 @@ function generateEnglish(grade) {
   const g = gradeNum(grade);
   if (g <= 2) {
     return pick([
-      choiceProblem({
-        prompt: "Which word rhymes with “cat”?",
-        speak: "Which word rhymes with cat?",
+      typedProblem({
+        prompt: "Which word rhymes with cat: hat or dog?",
+        speak: "Type hat or dog.",
         answer: "hat",
-        extras: ["dog", "sun", "tree"],
-        hint: "Rhymes share the same ending sound.",
+        hint: "Rhymes share an ending sound.",
+        meaning: "Cat and hat both end with at. Type hat.",
+        format: "Type: hat",
       }),
-      choiceProblem({
-        prompt: "A sentence usually ends with a…",
-        speak: "What mark often ends a sentence?",
+      typedProblem({
+        prompt: "A telling sentence usually ends with a period. Type period or plus.",
+        speak: "Type period or plus.",
         answer: "period",
-        extras: ["plus sign", "comma only", "hashtag"],
         hint: "It looks like a small dot.",
+        meaning: "Most sentences end with a period. Type period.",
+        format: "Type: period",
       }),
     ]);
   }
   if (g <= 5) {
     return pick([
-      choiceProblem({
-        prompt: "In the sentence “The fox jumps,” the verb is…",
-        speak: "Which word is the verb?",
+      typedProblem({
+        prompt: "In “The fox jumps,” which word is the verb?",
+        speak: "Type the verb.",
         answer: "jumps",
-        extras: ["The", "fox", "the fox"],
         hint: "A verb shows action.",
+        meaning: "Jumps is the action. Type jumps.",
+        format: "Type: jumps",
       }),
-      choiceProblem({
-        prompt: "The main idea of a paragraph is…",
-        speak: "What is a main idea?",
-        answer: "What the paragraph is mostly about",
-        extras: ["The longest word", "A random detail", "The page number"],
-        hint: "Details support the main idea; they are not the whole story.",
+      typedProblem({
+        prompt: "The main idea is what a paragraph is mostly about. Type main or page.",
+        speak: "Type main or page.",
+        answer: "main",
+        hint: "Details support it.",
+        meaning: "You want the main idea, not a tiny detail. Type main.",
+        format: "Type: main",
       }),
     ]);
   }
   if (g <= 8) {
     return pick([
-      choiceProblem({
-        prompt: "“The lake was a mirror” is an example of a…",
-        speak: "What kind of figurative language is that?",
+      typedProblem({
+        prompt: "“The lake was a mirror” is a metaphor or a timeline?",
+        speak: "Type metaphor or timeline.",
         answer: "metaphor",
-        extras: ["timeline", "footnote", "equation"],
-        hint: "It compares without using like or as.",
+        hint: "It compares without like or as.",
+        meaning: "It says the lake is a mirror. That is a metaphor. Type metaphor.",
+        format: "Type: metaphor",
       }),
-      choiceProblem({
-        prompt: "A narrator who uses “I” is speaking in…",
-        speak: "What point of view uses I?",
-        answer: "first person",
-        extras: ["future tense only", "stage left", "third planet"],
-        hint: "The storyteller is inside the story.",
+      typedProblem({
+        prompt: "A narrator who uses I is first person or third person?",
+        speak: "Type first or third.",
+        answer: "first",
+        hint: "The teller is inside the story.",
+        meaning: "I means first person. Type first.",
+        format: "Type: first",
       }),
     ]);
   }
   return pick([
-    choiceProblem({
-      prompt: "A claim in an argument is…",
-      speak: "What is a claim?",
-      answer: "The point the writer wants the reader to accept",
-      extras: ["A decorative font", "A random statistic with no job", "The page margin"],
-      hint: "Evidence is what supports the claim.",
+    typedProblem({
+      prompt: "A claim is the point a writer wants the reader to accept. Type claim or font.",
+      speak: "Type claim or font.",
+      answer: "claim",
+      hint: "Evidence supports it.",
+      meaning: "The claim is the writer’s main point. Type claim.",
+      format: "Type: claim",
     }),
-    choiceProblem({
-      prompt: "Which sentence uses a precise verb?",
-      speak: "Which verb is more precise?",
-      answer: "The scientist measured the rainfall.",
-      extras: ["The scientist did the thing.", "The scientist went stuff.", "The scientist was."],
+    typedProblem({
+      prompt: "Which is more precise: measured or did?",
+      speak: "Type measured or did.",
+      answer: "measured",
       hint: "Precise verbs tell the exact action.",
+      meaning: "Measured names the action clearly. Type measured.",
+      format: "Type: measured",
     }),
   ]);
 }
@@ -703,72 +761,80 @@ function generateHistory(grade) {
   const g = gradeNum(grade);
   if (g <= 2) {
     return pick([
-      choiceProblem({
-        prompt: "History is mainly the study of…",
-        speak: "What is history mainly about?",
-        answer: "People and events over time",
-        extras: ["Only clouds", "Only multiplication facts", "Only animal speeds"],
-        hint: "It is a story of then and now.",
+      typedProblem({
+        prompt: "History studies people over time. Type people or clouds.",
+        speak: "Type people or clouds.",
+        answer: "people",
+        hint: "Then and now.",
+        meaning: "History is about people and events over time. Type people.",
+        format: "Type: people",
       }),
-      choiceProblem({
-        prompt: "A community helper you might find at school is a…",
-        speak: "Who is a helper at school?",
+      typedProblem({
+        prompt: "A school helper who teaches is a teacher. Type teacher or mountain.",
+        speak: "Type teacher or mountain.",
         answer: "teacher",
-        extras: ["lighthouse", "mountain", "comet"],
         hint: "This person helps students learn.",
+        meaning: "The helper at school who helps you learn is a teacher. Type teacher.",
+        format: "Type: teacher",
       }),
     ]);
   }
   if (g <= 5) {
     return pick([
-      choiceProblem({
-        prompt: "A timeline is used to…",
-        speak: "What is a timeline for?",
-        answer: "Put events in order from earlier to later",
-        extras: ["Measure rainfall only", "Mix paint", "Count syllables"],
-        hint: "Left is often earlier; right is later.",
+      typedProblem({
+        prompt: "A timeline puts events in order. Type order or paint.",
+        speak: "Type order or paint.",
+        answer: "order",
+        hint: "Earlier to later.",
+        meaning: "Timelines show what happened first and next. Type order.",
+        format: "Type: order",
       }),
-      choiceProblem({
-        prompt: "Many early cities grew near rivers because rivers offered…",
-        speak: "Why rivers for early cities?",
-        answer: "Water for farms and travel",
-        extras: ["Shorter alphabets", "Fewer stars", "Thicker dictionaries"],
-        hint: "Farms and boats both need water.",
+      typedProblem({
+        prompt: "Early cities grew near rivers for water. Type water or stars.",
+        speak: "Type water or stars.",
+        answer: "water",
+        hint: "Farms and boats need it.",
+        meaning: "Rivers gave water for farms and travel. Type water.",
+        format: "Type: water",
       }),
     ]);
   }
   if (g <= 8) {
     return pick([
-      choiceProblem({
-        prompt: "Civics is the study of…",
-        speak: "What is civics?",
-        answer: "How people govern and live together",
-        extras: ["Only rock types", "Only verb tenses", "Only ocean tides"],
-        hint: "Think rights, laws, and public decisions.",
+      typedProblem({
+        prompt: "Civics is how people govern. Type govern or rocks.",
+        speak: "Type govern or rocks.",
+        answer: "govern",
+        hint: "Rights, laws, public decisions.",
+        meaning: "Civics is living together under rules. Type govern.",
+        format: "Type: govern",
       }),
-      choiceProblem({
-        prompt: "A good historian asks…",
-        speak: "What question should a historian ask?",
-        answer: "Whose voice is in this source, and whose is missing?",
-        extras: ["How do I erase the past?", "Which font is luckiest?", "Can I skip evidence?"],
+      typedProblem({
+        prompt: "Historians ask whose voice is in a source. Type voice or font.",
+        speak: "Type voice or font.",
+        answer: "voice",
         hint: "Sources have points of view.",
+        meaning: "Ask whose story is told and whose is missing. Type voice.",
+        format: "Type: voice",
       }),
     ]);
   }
   return pick([
-    choiceProblem({
-      prompt: "Continuity in history means…",
-      speak: "What does continuity mean?",
-      answer: "Some patterns stay similar even as other things change",
-      extras: ["Nothing ever changes", "Maps are always wrong", "Dates do not matter"],
-      hint: "Change and continuity can happen at the same time.",
+    typedProblem({
+      prompt: "Continuity means some patterns stay similar. Type continuity or rumor.",
+      speak: "Type continuity or rumor.",
+      answer: "continuity",
+      hint: "Change and continuity can both happen.",
+      meaning: "Continuity is what stays similar over time. Type continuity.",
+      format: "Type: continuity",
     }),
-    choiceProblem({
-      prompt: "A strong historical claim should…",
-      speak: "What should a historical claim do?",
-      answer: "Cite evidence and admit uncertainty",
-      extras: ["Ignore diaries", "Use only rumors", "Avoid dates"],
-      hint: "Evidence first; humility when the record is thin.",
+    typedProblem({
+      prompt: "A strong historical claim should cite evidence. Type evidence or rumors.",
+      speak: "Type evidence or rumors.",
+      answer: "evidence",
+      hint: "Use sources, not guesses.",
+      meaning: "Claims about the past need evidence. Type evidence.",
+      format: "Type: evidence",
     }),
   ]);
 }

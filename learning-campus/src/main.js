@@ -1,4 +1,3 @@
-import { createCampus } from "./campus.js";
 import {
   GRADES,
   SUBJECTS,
@@ -25,9 +24,7 @@ import {
   markLesson,
 } from "./progress.js";
 
-const MAIN_SUBJECTS = SUBJECTS.filter((s) =>
-  ["math", "science", "geography"].includes(s.id)
-);
+const MAIN_SUBJECTS = SUBJECTS;
 
 const state = loadProgress();
 const ui = {
@@ -54,6 +51,8 @@ const ui = {
   quiz: document.getElementById("quiz-board"),
   quizKicker: document.getElementById("quiz-kicker"),
   quizPrompt: document.getElementById("quiz-prompt"),
+  quizMeaning: document.getElementById("quiz-meaning"),
+  quizFormat: document.getElementById("quiz-format"),
   quizInput: document.getElementById("quiz-input"),
   quizFb: document.getElementById("quiz-fb"),
 };
@@ -139,7 +138,7 @@ function finishBoot() {
     state.subject = params.get("subject");
   }
   ui.boot.classList.add("fade");
-  setTimeout(() => ui.boot.classList.add("hidden"), 500);
+  setTimeout(() => ui.boot.classList.add("hidden"), 180);
   if (state.grade && state.subject) selectSubject(state.subject);
   else if (state.grade) {
     showSubject();
@@ -152,6 +151,7 @@ function showGrade() {
   ui.subjectScreen.classList.add("hidden");
   ui.quiz.classList.add("hidden");
   say(LINES.welcome);
+  loadCampus();
 }
 
 function showSubject() {
@@ -177,14 +177,24 @@ function selectSubject(id) {
   ui.hud.classList.remove("hidden");
   ui.help.classList.remove("hidden");
   refreshHud();
-  if (!campus) {
-    campus = createCampus(document.getElementById("scene"), {
-      onZone: handleZone,
-      onInteract: handleInteract,
-    });
-  }
-  say(LINES.pickSubject(state.grade, id));
   startOnScreenQuiz();
+  say(LINES.pickSubject(state.grade, id));
+  loadCampus();
+}
+
+let campusLoad;
+function loadCampus() {
+  if (campus) return campusLoad;
+  campusLoad = import("./campus.js").then(({ createCampus }) => {
+    if (!campus) {
+      campus = createCampus(document.getElementById("scene"), {
+        onZone: handleZone,
+        onInteract: handleInteract,
+      });
+    }
+    return campus;
+  });
+  return campusLoad;
 }
 
 function refreshHud() {
@@ -368,10 +378,12 @@ function showOnScreenProblem() {
   const subj = SUBJECTS.find((s) => s.id === state.subject);
   ui.quizKicker.textContent = `${gradeLabel(state.grade)} · ${subj.name}`;
   ui.quizPrompt.textContent = problem.prompt;
+  ui.quizMeaning.textContent = `What this means: ${problem.meaning}`;
+  ui.quizFormat.textContent = problem.format || "Type your answer in the box, then press Enter.";
   ui.quizInput.value = "";
   ui.quizFb.textContent = "";
   ui.quizFb.className = "feedback";
-  say(problem.speak);
+  say(`${problem.speak} ${problem.meaning}`);
   ui.quizInput.focus();
 }
 
@@ -417,4 +429,4 @@ document.addEventListener(
   { capture: true }
 );
 tryTheme();
-setTimeout(finishBoot, 1400);
+setTimeout(finishBoot, 280);
