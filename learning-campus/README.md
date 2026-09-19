@@ -14,7 +14,9 @@ npm run dev -- --host 0.0.0.0 --port 5173
 
 Open **http://localhost:5173** in Chrome.
 
-Public HTTPS (no localhost): **https://knows-explicitly-cologne-gregory.trycloudflare.com/**
+Public HTTPS (no localhost, live tunnel): **https://ending-framed-programmer-potentially.trycloudflare.com/**
+
+Stable GitHub Pages (after the Pages workflow succeeds): **https://mizbamd.github.io/agentic-rag-engine/**
 
 - Loading title is **Verity**, with an original Web Audio theme (mute on the loading screen or HUD).
 - Click your grade, then a subject (Math, Science, Geography, Reading & English, or History).
