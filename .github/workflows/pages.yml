@@ -1,11 +1,10 @@
 name: Deploy Learning Campus
 
+# GitHub Pages is not enabled on this repo. The last on-push deploy failed with
+# "Create Pages site failed. Resource not accessible by integration" — only the
+# repo owner can turn Pages on in Settings. Do not run on push until then.
 on:
-  push:
-    branches: [main, cursor/learning-campus-d7b5]
-    paths:
-      - "learning-campus/**"
-      - ".github/workflows/pages.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,6 +17,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: false
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -31,8 +31,6 @@ jobs:
         working-directory: learning-campus
         run: npm ci && npm run build
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: learning-campus/dist
