@@ -38,6 +38,78 @@ body,
   cursor: none;
 }
 
+.boot {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 32%, #f7efe0 0%, transparent 42%),
+    linear-gradient(180deg, #dceee6, #efe6d6);
+  transition: opacity 0.45s ease;
+}
+
+.boot.fade {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.boot-kicker {
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 13px;
+  color: var(--sage-deep);
+  margin: 0 0 8px;
+}
+
+.boot-title {
+  margin: 0;
+  font-size: clamp(72px, 16vw, 128px);
+  line-height: 0.95;
+  font-weight: 700;
+  color: #4f7a66;
+  letter-spacing: 0.02em;
+}
+
+.boot-sub {
+  margin: 14px 0 22px;
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.boot-bar {
+  width: min(240px, 50vw);
+  height: 8px;
+  border-radius: 99px;
+  background: #eadfcd;
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.boot-bar span {
+  display: block;
+  height: 100%;
+  width: 30%;
+  background: var(--sage);
+  animation: boot-load 1.2s ease-in-out infinite;
+}
+
+@keyframes boot-load {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
+}
+
+.boot-mute {
+  pointer-events: auto;
+}
+
 .screen {
   position: absolute;
   inset: 0;

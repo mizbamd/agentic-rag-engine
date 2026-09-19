@@ -10,7 +10,15 @@
     <div id="app">
       <canvas id="scene"></canvas>
 
-      <div id="grade-screen" class="screen">
+      <div id="boot-screen" class="boot">
+        <p class="boot-kicker">Learning Campus</p>
+        <h1 class="boot-title">Verity</h1>
+        <p class="boot-sub" id="boot-sub">Preparing the trails…</p>
+        <div class="boot-bar"><span></span></div>
+        <button type="button" class="pill boot-mute" id="boot-mute">Theme on</button>
+      </div>
+
+      <div id="grade-screen" class="screen hidden">
         <div class="screen-card">
           <p class="eyebrow">Learning Campus</p>
           <h1>Hi, I’m Verity.</h1>
@@ -51,6 +59,9 @@
         </div>
         <div class="hud-right">
           <span id="score-chip" class="pill quiet">0 / 0</span>
+          <button type="button" class="pill" id="theme-btn" aria-pressed="true">
+            Theme on
+          </button>
           <button type="button" class="pill" id="mute-btn" aria-pressed="false">
             Voice on
           </button>

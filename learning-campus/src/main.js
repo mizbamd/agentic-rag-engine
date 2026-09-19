@@ -11,6 +11,13 @@ import {
 } from "./content.js";
 import { initVoice, speak, setMuted, isMuted } from "./voice.js";
 import {
+  initTheme,
+  startTheme,
+  setThemeMuted,
+  isThemeMuted,
+  duckTheme,
+} from "./theme.js";
+import {
   loadProgress,
   saveProgress,
   getScore,
@@ -34,12 +41,16 @@ const ui = {
   gradeChip: document.getElementById("grade-chip"),
   subjectChip: document.getElementById("subject-chip"),
   muteBtn: document.getElementById("mute-btn"),
+  themeBtn: document.getElementById("theme-btn"),
   scoreChip: document.getElementById("score-chip"),
   prompt: document.getElementById("prompt"),
   speech: document.getElementById("speech"),
   speechText: document.getElementById("speech-text"),
   panel: document.getElementById("panel"),
   backGrade: document.getElementById("back-to-grade"),
+  boot: document.getElementById("boot-screen"),
+  bootSub: document.getElementById("boot-sub"),
+  bootMute: document.getElementById("boot-mute"),
 };
 
 let campus;
@@ -53,10 +64,15 @@ initVoice({
     ui.speech.classList.remove("hidden");
     ui.speechText.textContent = text;
     campus?.setSpeaking(true);
+    duckTheme(true);
     clearTimeout(initVoice._t);
-    initVoice._t = setTimeout(() => campus?.setSpeaking(false), 1600);
+    initVoice._t = setTimeout(() => {
+      campus?.setSpeaking(false);
+      duckTheme(false);
+    }, 1600);
   },
 });
+initTheme({ muted: state.musicMuted });
 
 function say(text) {
   speak(text);
@@ -89,6 +105,36 @@ ui.muteBtn.addEventListener("click", () => {
   refreshHud();
   say(state.muted ? LINES.muteOn : LINES.muteOff);
 });
+ui.themeBtn.addEventListener("click", toggleTheme);
+ui.bootMute.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleTheme();
+});
+
+function toggleTheme() {
+  state.musicMuted = setThemeMuted(!isThemeMuted());
+  saveProgress(state);
+  refreshHud();
+  if (!state.musicMuted) startTheme();
+}
+
+async function tryTheme() {
+  if (state.musicMuted) return;
+  const ok = await startTheme();
+  ui.bootSub.textContent = ok
+    ? "Preparing the trails…"
+    : "Click to begin — theme and trails";
+}
+
+function finishBoot() {
+  ui.boot.classList.add("fade");
+  setTimeout(() => ui.boot.classList.add("hidden"), 500);
+  if (state.grade && state.subject) selectSubject(state.subject);
+  else if (state.grade) {
+    showSubject();
+    say(LINES.pickGrade(state.grade));
+  } else showGrade();
+}
 
 function showGrade() {
   ui.gradeScreen.classList.remove("hidden");
@@ -133,6 +179,10 @@ function refreshHud() {
   ui.subjectChip.textContent = s ? s.name : "Subject";
   ui.muteBtn.textContent = state.muted ? "Voice off" : "Voice on";
   ui.muteBtn.setAttribute("aria-pressed", String(!state.muted));
+  const themeLabel = state.musicMuted ? "Theme off" : "Theme on";
+  ui.themeBtn.textContent = themeLabel;
+  ui.themeBtn.setAttribute("aria-pressed", String(!state.musicMuted));
+  ui.bootMute.textContent = themeLabel;
   const sc = getScore(state, state.grade, state.subject || "math");
   ui.scoreChip.textContent = `${sc.correct} / ${sc.attempted}`;
 }
@@ -284,11 +334,14 @@ function closePanel() {
   ui.panel.innerHTML = "";
 }
 
-if (state.grade && state.subject) {
-  selectSubject(state.subject);
-} else if (state.grade) {
-  showSubject();
-  say(LINES.pickGrade(state.grade));
-} else {
-  showGrade();
-}
+refreshHud();
+document.addEventListener(
+  "pointerdown",
+  (e) => {
+    if (e.target.closest("#boot-mute, #theme-btn")) return;
+    tryTheme();
+  },
+  { capture: true }
+);
+tryTheme();
+setTimeout(finishBoot, 1400);

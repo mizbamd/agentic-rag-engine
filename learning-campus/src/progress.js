@@ -4,6 +4,7 @@ const DEFAULT = {
   grade: null,
   subject: null,
   muted: false,
+  musicMuted: false,
   scores: {},
 };
 
